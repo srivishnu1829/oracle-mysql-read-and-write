@@ -23,10 +23,10 @@ job.init(args['JOB_NAME'], args)
 
 
 # connection_mysql8_options = {
-#     "url": "jdbc:mysql://db-rds-dev.cg6mtzrdu9a8.ap-south-1.rds.amazonaws.com:3306/efreightx_dev101",
-#     "dbtable": "efs_tos_master",
-#     "user": "efreightx_dev101",
-#     "password": "efreightxdev@2021",
+#     "url": "jdbc:mysql://sdjsdjsdjal",
+#     "dbtable": "master",
+#     "user": "esfsssdsdd",
+#     "password": "ewoiwdj",
 #     "customJdbcDriverS3Path": "s3://dbmigrate1/mysql-connector-java-8.0.20.jar",
 #     "customJdbcDriverClassName": "com.mysql.cj.jdbc.Driver"}
     
@@ -84,17 +84,17 @@ df2.show(5)
 #df= df_mysql8.toDF()
     
 
-db_properties={"user":"efreightx_dev101", "password": "efreightxdev@2021",  "customJdbcDriverS3Path": "s3://dbmigrate1/mysql-connector-java-8.0.20.jar", "customJdbcDriverClassName": "com.mysql.cj.jdbc.Driver"}
+db_properties={"user":sdsadnakd", "password": "weuiwn",  "customJdbcDriverS3Path": "s3://db/mysql-connector-java-8.0.20.jar", "customJdbcDriverClassName": "com.mysql.cj.jdbc.Driver"}
 
 
 
 
-#-(use-ref)-------df1.write.option("encoding", "UTF-8").jdbc(url='jdbc:mysql://db-rds-dev.cg6mtzrdu9a8.ap-south-1.rds.amazonaws.com:3306/efreightx_dev101', table='efreightx_dev101.efs_tos_master_test', mode="append",  properties = connection_mysql8_options) 
+#-(use-ref)-------df1.write.option("encoding", "UTF-8").jdbc(url='jdbc:mysql://db-rds-dev.cg6mtzrdu9a8.ap-south-1.rds.amazonaws.com:3306/dbname', table='loaction-target', mode="append",  properties = connection_mysql8_options) 
 
 
-#-----target_df=glueContext.write_dynamic_frame.from_jdbc_conf(frame=df1, catalog_connection="mysql",connection_options = {"dbtable": "efreightx_dev101.efs_tos_master_test", "database": "efreightx_dev101"},transformation_ctx = "target_df")
+#-----target_df=glueContext.write_dynamic_frame.from_jdbc_conf(frame=df1, catalog_connection="mysql",connection_options = {"dbtable": "_master_test", "database": "dev101"},transformation_ctx = "target_df")
 
-#df2.write.mode("append").jdbc(url='jdbc:mysql://db-rds-dev.cg6mtzrdu9a8.ap-south-1.rds.amazonaws.com:3306/efreightx_dev101', table='efreightx_dev101.efs_tos_master_test',  properties=db_properties) 
+#df2.write.mode("append").jdbc(url='jdbc:mysql://db-rds-dev.cg6mtzrdu9a8.ap-south-1.rds.amazonaws.com:3306/e', table='master_test',  properties=db_properties) 
 
-df2.write.option("encoding", "UTF-8").jdbc(url='jdbc:mysql://db-rds-dev.cg6mtzrdu9a8.ap-south-1.rds.amazonaws.com:3306/efreightx_dev101', table='db_migrate.efs_branch_master_new', mode="append", properties=db_properties) 
+df2.write.option("encoding", "UTF-8").jdbc(url='jdbc:mysql://db-rds-dev.cg6mtzrdu9a8.ap-south-1.rds.amazonaws.com:3306/ehfhf', table='db_migrate.branch_master_new', mode="append", properties=db_properties) 
 
