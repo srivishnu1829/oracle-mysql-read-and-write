@@ -1,0 +1,100 @@
+import sys
+import datetime
+from pyspark.sql.functions  import date_format
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from pyspark.sql.functions import lit
+from awsglue.context import GlueContext
+from pyspark.sql import SQLContext
+from awsglue.dynamicframe import DynamicFrame
+from pyspark.sql.functions import *
+from awsglue.job import Job
+#import org.apache.spark.sql.SaveMode
+
+## @params: [JOB_NAME]
+args = getResolvedOptions(sys.argv, ['JOB_NAME'])
+
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args['JOB_NAME'], args)
+
+
+# connection_mysql8_options = {
+#     "url": "jdbc:mysql://db-rds-dev.cg6mtzrdu9a8.ap-south-1.rds.amazonaws.com:3306/efreightx_dev101",
+#     "dbtable": "efs_tos_master",
+#     "user": "efreightx_dev101",
+#     "password": "efreightxdev@2021",
+#     "customJdbcDriverS3Path": "s3://dbmigrate1/mysql-connector-java-8.0.20.jar",
+#     "customJdbcDriverClassName": "com.mysql.cj.jdbc.Driver"}
+    
+#jdbc:mysql://db-aurora-dev-cluster.cluster-cg6mtzrdu9a8.ap-south-1.rds.amazonaws.com:3306/efreightx
+    
+
+
+# # Read from JDBC databases with custom driver
+#----df_mysql8 = glueContext.create_dynamic_frame.from_options(connection_type="mysql",connection_options=connection_mysql8_options)
+
+df_oracle = spark.read.option("header","true").option("delimiter", ',').option("quote", "\"").option("multiLine", "true").csv("s3://dbmigrate1/Oracle-Backup_files/BRANCH_MASTER_202104281719.csv")
+
+#df1= df_oracle.toDF()
+#df_oracle.show(5) 
+df_oracle.count() 
+
+#print(len(df_oracle))
+
+df=DynamicFrame.fromDF(df_oracle, glueContext, "nested")
+# #df.printSchema()
+# #df.toDF().show(10)
+
+
+applymapping1 = ApplyMapping.apply(frame = df, mappings = [
+("CREATE_USER", "string", "created_user", "string"),
+("CREATE_DATE", "string", "created_date", "string"),
+("RUN_USER", "string", "updated_user", "string"),
+("RUN_DATE", "string", "updated_date", "string"),
+("COMPANY_CODE", "string", "COMPANY_CODE", "string"),
+("BRANCH_CODE", "string", "BRANCH_CODE", "string"),
+("LOCATION_CODE", "string", "LOCATION_CODE", "string"),
+("NOTE", "string", "note", "string"),
+("BRANCH_NAME", "string", "BRANCH_NAME", "string"),
+("HBL_LINE_CODE", "string", "HBL_LINE_CODE", "string"),
+("IS_OUR_OFFICE", "string", "IS_OUR_OFFICE", "string"),
+("JOB_PREFIX", "string", "JOB_PREFIX", "string"),
+("IS_HEAD_OFFICE", "string", "IS_HEAD_OFFICE", "string"),
+("MQ_SERVER_TIME", "string", "MQ_SERVER_TIME", "string"),
+("DATE_TIME_FORMAT", "string", "DATE_TIME_FORMAT", "string"),
+("STATE_CODE", "string", "STATE_CODE", "string")], transformation_ctx = "applymapping1")
+
+#
+
+resolvechoice2 = ResolveChoice.apply(frame = applymapping1, choice = "make_cols", transformation_ctx = "resolvechoice2")
+
+dropnullfields3 = DropNullFields.apply(frame = resolvechoice2, transformation_ctx = "dropnullfields3")
+
+df2=dropnullfields3.toDF()
+
+df2.show(5)
+
+#dropnullfields3.show(5)
+
+
+#df= df_mysql8.toDF()
+    
+
+db_properties={"user":"efreightx_dev101", "password": "efreightxdev@2021",  "customJdbcDriverS3Path": "s3://dbmigrate1/mysql-connector-java-8.0.20.jar", "customJdbcDriverClassName": "com.mysql.cj.jdbc.Driver"}
+
+
+
+
+#-(use-ref)-------df1.write.option("encoding", "UTF-8").jdbc(url='jdbc:mysql://db-rds-dev.cg6mtzrdu9a8.ap-south-1.rds.amazonaws.com:3306/efreightx_dev101', table='efreightx_dev101.efs_tos_master_test', mode="append",  properties = connection_mysql8_options) 
+
+
+#-----target_df=glueContext.write_dynamic_frame.from_jdbc_conf(frame=df1, catalog_connection="mysql",connection_options = {"dbtable": "efreightx_dev101.efs_tos_master_test", "database": "efreightx_dev101"},transformation_ctx = "target_df")
+
+#df2.write.mode("append").jdbc(url='jdbc:mysql://db-rds-dev.cg6mtzrdu9a8.ap-south-1.rds.amazonaws.com:3306/efreightx_dev101', table='efreightx_dev101.efs_tos_master_test',  properties=db_properties) 
+
+df2.write.option("encoding", "UTF-8").jdbc(url='jdbc:mysql://db-rds-dev.cg6mtzrdu9a8.ap-south-1.rds.amazonaws.com:3306/efreightx_dev101', table='db_migrate.efs_branch_master_new', mode="append", properties=db_properties) 
+
